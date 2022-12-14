@@ -1,6 +1,7 @@
 
 #include "main.h"
 #include "tim.h"
+#include <map>
 
 typedef void(*OnTickListener)();
 
