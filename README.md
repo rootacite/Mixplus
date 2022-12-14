@@ -1,7 +1,8 @@
 # Mixplus
 
 ## Serial类用于读写串口
-### Serial(UART_HandleTypeDef *t)
+Serial(UART_HandleTypeDef *t)
+------- 
 用串口句柄初始化类。<br>
 参数：<br>
 t：串口句柄<br>
@@ -9,8 +10,8 @@ t：串口句柄<br>
 ```cpp
 Serial Serial1 = new Serial(&huart1);
 ```
-<br>
-### bool available();
+bool available();
+------- 
 判断串口是否有待读取的数据。<br>
 参数：无<br>
 返回值：<br>
