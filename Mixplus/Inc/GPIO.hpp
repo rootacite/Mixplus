@@ -14,12 +14,13 @@ public:
 
     bool get();
     void set(bool s);
+    void toggle();
 };
 
 GPIO::GPIO(GPIO_TypeDef* Port, int16_t Pin)
 {
-    this->Port=Port;
-    this->Pin=Pin;
+    this->Port = Port;
+    this->Pin = Pin;
 }
 
 bool GPIO::get()
@@ -29,8 +30,13 @@ bool GPIO::get()
 
 void GPIO::set(bool s)
 {
-    if(s)
-        HAL_GPIO_WritePin(Port,Pin,HIGH);
+    if (s)
+        HAL_GPIO_WritePin(Port, Pin, HIGH);
     else
-        HAL_GPIO_WritePin(Port,Pin,LOW);
+        HAL_GPIO_WritePin(Port, Pin, LOW);
+}
+
+void GPIO::toggle()
+{
+    this->set(!this->get());
 }
