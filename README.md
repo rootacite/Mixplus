@@ -1,5 +1,94 @@
 Mixplus
 =======
+## Timer类用于操作定时器
+
+范例：
+-----
+以下代码每隔1s翻转PB12口，并从串口输出Catched.
+```cpp
+Timer* Timer1 = nullptr;
+GPIO* PB12 = nullptr;
+
+void setup()
+{
+    Timer1 = new Timer(&htim2);   //初始化定时器
+    PB12 = new GPIO(GPIOB, GPIO_PIN_12);  //初始化IO口
+
+    Timer1->freq(96, 2000);   //将频率设置为2000Hz，96是时钟主频96MHz，根据时钟树设置调整
+    Timer1->circle(2000);     //每隔2000定时器周期触发一起ontick
+    Timer1->ontick([]()       //用Lambda 表达式注册事件
+        {
+            //这两行代码每1s会被执行一次
+            Serial1->writeline("Catched.");   //串口输出Catched.
+            PB12->set(!PB12->get());          //翻转PB12
+        });
+    Timer1->start();          //开启定时器
+
+}
+```
+
+## PWM类用于生成PWM波
+
+范例：
+-----
+以下代码在Tim3定时器的1通道点亮呼吸灯
+
+```cpp
+PWM *PWM1= nullptr;
+
+void setup() {
+    PWM1 = new PWM(&htim3);
+}
+
+void loop() {
+    for(double i=0;i<0.35;i+=0.01)
+    {
+        PWM1->pulse(0,i);
+        Timer::delay(10);
+    }
+    for(double i=0.35;i>0;i-=0.01)
+    {
+        PWM1->pulse(0,i);
+        Timer::delay(10);
+    }
+}
+```
+
+## GPIO类用于操作通用IO口
+
+## Analog和AnalogDMA类用于操作ADC
+
+范例：
+-----
+以下代码每隔500ms，读取一次ADC1的四个通道，并从串口输出
+
+```cpp
+
+Serial* Serial1 = NULL;
+AnalogDMA *Adc1= nullptr;
+
+void setup()
+{
+    Serial1 = new Serial(&huart1);
+    Adc1 = new AnalogDMA(&hadc1,4);
+}
+
+void loop() {
+    HAL_Delay(500);
+    auto cv=Adc1->get();
+
+    int cp=0;
+    for(uint16_t i : cv)
+    {
+        string cs="AD";
+        cs += to_string(cp);
+        cs += ":";
+        cs += to_string(i);
+        cp++;
+        Serial1->writeline(cs);
+    }
+}
+```
 
 ## Serial类用于读写串口
 Serial(UART_HandleTypeDef *t)
