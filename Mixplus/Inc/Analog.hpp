@@ -48,7 +48,7 @@ private:
     uint16_t* Buffer = nullptr;
 public:
     explicit AnalogDMA(ADC_HandleTypeDef* a, int cc);
-
+    void begin();
     std::vector<uint16_t> get();
 };
 
@@ -57,7 +57,11 @@ AnalogDMA::AnalogDMA(ADC_HandleTypeDef* a, int cc)
     this->count_of_channels = cc;
     this->adc = a;
     Buffer = new uint16_t[cc];
-    HAL_ADC_Start_DMA(adc, (uint32_t*)Buffer, cc);
+}
+
+void AnalogDMA::begin()
+{
+    HAL_ADC_Start_DMA(adc, (uint32_t*)Buffer, count_of_channels);
 }
 
 std::vector<uint16_t> AnalogDMA::get() {

@@ -20,6 +20,7 @@ public:
 
     int bufferedSize();
     bool available();
+    void begin();
 
     char read();
     std::string readline();
@@ -37,9 +38,14 @@ std::map<UART_HandleTypeDef *,Serial *> Launched_Dic;
 Serial::Serial(UART_HandleTypeDef* t)
 {
     this->uart = t;
-    HAL_UART_Receive_IT(t,cc_serial,1);
-
+    
     Launched_Dic.insert(std::pair<UART_HandleTypeDef *,Serial *>(this->uart,this));
+}
+
+void Serial::begin()
+{
+    HAL_UART_Receive_IT(uart, cc_serial, 1);
+
 }
 
 int Serial::bufferedSize()

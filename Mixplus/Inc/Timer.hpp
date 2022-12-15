@@ -89,5 +89,6 @@ void Timer::circle(int c)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    Launched_Tim[htim]->tick();
+    if (Launched_Tim[htim]->tick != nullptr)
+        Launched_Tim[htim]->tick();
 }
