@@ -1,38 +1,59 @@
 
 #include "main.h"
-#include <map>
 
 typedef void(*OnExtiCallBack)();
-
+static uint16_t Pins[]={
+        GPIO_PIN_0,GPIO_PIN_1,GPIO_PIN_2,GPIO_PIN_3,GPIO_PIN_4,GPIO_PIN_5,
+        GPIO_PIN_6,GPIO_PIN_7,GPIO_PIN_8,GPIO_PIN_9,GPIO_PIN_10,GPIO_PIN_11,
+        GPIO_PIN_12,GPIO_PIN_13,GPIO_PIN_14,GPIO_PIN_15
+};
+static OnExtiCallBack CallBacks[]={
+        nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,
+        nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr
+};
 class Exti
 {
-private:
-    friend void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
-    OnExtiCallBack CallBack;
-    uint16_t Pin;
-
 public:
-    Exti(uint16_t Pin,OnExtiCallBack proc);
-    ~Exti();
+    static void attachInterrupt(uint16_t Pin,OnExtiCallBack proc);
+    static void detachInterrupt(uint16_t Pin);
 };
-std::map<uint16_t,Exti*> CallBackList;
 
-Exti::Exti(uint16_t Pin,OnExtiCallBack proc)
+void Exti::attachInterrupt(uint16_t Pin, OnExtiCallBack proc)
 {
-    CallBack = proc;
-    this->Pin=Pin;
-    CallBackList.insert(std::make_pair(Pin,this));
+    int p = 0;
+    for(uint16_t i : Pins)
+    {
+        if(i==Pin)
+        {
+            CallBacks[p] = proc;
+        }
+        p++;
+    }
 }
 
-Exti::~Exti()
+void Exti::detachInterrupt(uint16_t Pin)
 {
-    CallBackList.erase(Pin);
+    int p = 0;
+    for(uint16_t i : Pins)
+    {
+        if(i==Pin)
+        {
+            CallBacks[p] = nullptr;
+        }
+        p++;
+    }
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-   if(CallBackList.count(GPIO_Pin) == 0)return;
-
-    CallBackList[GPIO_Pin]->CallBack();
+    int p = 0;
+    for(uint16_t i : Pins)
+    {
+        if(i==GPIO_Pin && CallBacks[p]!= nullptr)
+        {
+            CallBacks[p]();
+        }
+        p++;
+    }
 }
 

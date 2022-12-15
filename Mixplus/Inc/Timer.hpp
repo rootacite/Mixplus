@@ -1,7 +1,6 @@
 
 #include "main.h"
 #include "tim.h"
-#include <map>
 
 typedef void(*OnTickListener)();
 
@@ -28,7 +27,9 @@ public:
     void circle(int c);
 };
 
-std::map<TIM_HandleTypeDef *,Timer *> Launched_Tim;
+TIM_HandleTypeDef *tim_handle_list[16] = {0};
+Timer * obj_list[16] = {0};
+int Point_Of_Timer = 0;
 
 void Timer::delay(int t) {
     HAL_Delay(t);
@@ -36,14 +37,23 @@ void Timer::delay(int t) {
 
 Timer::Timer(TIM_HandleTypeDef *t) {
     this->tim=t;
-    Launched_Tim.insert(std::make_pair(t,this));
+    this->tick = nullptr;
+
+    tim_handle_list[Point_Of_Timer] = t;
+    obj_list[Point_Of_Timer] = this;
+
+    Point_Of_Timer++;
 }
 
 Timer::Timer(TIM_HandleTypeDef *t, int arr) {
     this->tim=t;
-
+    this->tick = nullptr;
     this->tim->Instance->ARR = arr;
-    Launched_Tim.insert(std::make_pair(t,this));
+
+    tim_handle_list[Point_Of_Timer] = t;
+    obj_list[Point_Of_Timer] = this;
+
+    Point_Of_Timer++;
 }
 
 void Timer::ontick(OnTickListener CallBack) {
@@ -87,7 +97,12 @@ void Timer::circle(int c)
     tim->Instance->ARR = c;
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-    Launched_Tim[htim]->tick();
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+    for (int i = 0; i < Point_Of_Timer; i++) {
+        if (tim_handle_list[i] == htim) {
+            if (obj_list[i]->tick != nullptr)
+                obj_list[i]->tick();
+            break;
+        }
+    }
 }

@@ -1,3 +1,4 @@
+#include "stdlib.h"
 
 template <typename T>
 class Buffer
@@ -12,7 +13,7 @@ private:
 	void circle_raise(unsigned int* x, unsigned int limit);
 
 public:
-	Buffer(int Size);
+	explicit Buffer(int Size);
 	~Buffer();
 
 	unsigned int buffered_size();
@@ -38,7 +39,7 @@ unsigned int Buffer<T>::size()
 template <typename T>
 Buffer<T>::Buffer(int Size)
 {
-	_buffer = new T[Size];
+	_buffer = (T*)malloc(sizeof(T)*Size);
 	_size = Size;
 	_point = 0;
 }
@@ -46,7 +47,7 @@ Buffer<T>::Buffer(int Size)
 template <typename T>
 Buffer<T>::~Buffer()
 {
-	delete[] _buffer;
+	free(_buffer);
 }
 
 template <typename T>
@@ -59,7 +60,7 @@ void Buffer<T>::circle_raise(unsigned int* x, unsigned int limit)
 template <typename T>
 void Buffer<T>::push(T c)
 {
-	if (_count == _size) throw 1;
+	//if (_count == _size) throw 1;
 
 	_buffer[_point] = c;
 	circle_raise(&_point, _size);
@@ -70,7 +71,7 @@ void Buffer<T>::push(T c)
 template <typename T>
 T Buffer<T>::pop()
 {
-	if (_count == 0)throw 0;
+	//if (_count == 0)throw 0;
 
 	T c = _buffer[_bottom];
 	circle_raise(&_bottom, _size);

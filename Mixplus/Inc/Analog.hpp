@@ -1,8 +1,7 @@
 
 #include "main.h"
 #include "adc.h"
-
-#include <vector>
+#include "stdlib.h"
 
 class Analog
 {
@@ -13,7 +12,7 @@ private:
 public:
     explicit Analog(ADC_HandleTypeDef* a, int cc);
 
-    std::vector<uint16_t> get();
+    void get(uint16_t * buf);
 };
 
 Analog::Analog(ADC_HandleTypeDef* a, int cc)
@@ -22,9 +21,8 @@ Analog::Analog(ADC_HandleTypeDef* a, int cc)
     this->adc = a;
 }
 
-std::vector<uint16_t> Analog::get()
+void Analog::get(uint16_t * buf)
 {
-    std::vector<uint16_t> r;
 
     for (int i = 0; i < count_of_channels; i++)
     {
@@ -32,11 +30,9 @@ std::vector<uint16_t> Analog::get()
         HAL_ADC_PollForConversion(adc, 0xFFFF);
 
         if (HAL_IS_BIT_SET(HAL_ADC_GetState(adc), HAL_ADC_STATE_REG_EOC)) {
-            r.push_back(HAL_ADC_GetValue(adc));
+            buf[i] = HAL_ADC_GetValue(adc);
         }
     }
-
-    return r;
 }
 
 class AnalogDMA
@@ -48,25 +44,26 @@ private:
     uint16_t* Buffer = nullptr;
 public:
     explicit AnalogDMA(ADC_HandleTypeDef* a, int cc);
-
-    std::vector<uint16_t> get();
+    void begin();
+    void get(uint16_t * buf);
 };
 
 AnalogDMA::AnalogDMA(ADC_HandleTypeDef* a, int cc)
 {
     this->count_of_channels = cc;
     this->adc = a;
-    Buffer = new uint16_t[cc];
-    HAL_ADC_Start_DMA(adc, (uint32_t*)Buffer, cc);
+    Buffer = (uint16_t*)malloc(sizeof(uint16_t) * cc);
 }
 
-std::vector<uint16_t> AnalogDMA::get() {
+void AnalogDMA::begin()
+{
+    HAL_ADC_Start_DMA(adc, (uint32_t*)Buffer, count_of_channels);
+}
 
-    std::vector<uint16_t> r;
+void AnalogDMA::get(uint16_t * buf) {
+
     for (int i = 0; i < count_of_channels; i++)
     {
-        r.push_back(Buffer[i]);
+        buf[i] = Buffer[i];
     }
-
-    return r;
 }
